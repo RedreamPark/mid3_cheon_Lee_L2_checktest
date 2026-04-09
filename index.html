@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Amazing Ants</title>
+<style>
+:root{
+  --green:#1D9E75;--green-d:#0F6E56;--green-l:#E1F5EE;--green-deep:#085041;
+  --red:#A32D2D;--red-l:#FCEBEB;--red-deep:#501313;
+  --amber:#BA7517;--amber-l:#FAEEDA;--amber-deep:#633806;
+  --blue:#185FA5;--blue-l:#E6F1FB;--blue-deep:#0C3A6B;
+  --purple:#6B3FA0;--purple-l:#F0EAF9;--purple-deep:#2E1248;
+  --bg:#F5F3EF;--card:#FFFFFF;--border:rgba(0,0,0,0.08);
+  --text:#1a1a1a;--muted:#666;--hint:#aaa;--r:12px;--rs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+#app{max-width:700px;margin:0 auto;padding:24px 16px 60px;}
+.intro-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2.5rem 2rem;text-align:center;margin-top:16px;}
+.intro-logo{font-size:11px;font-weight:800;letter-spacing:.14em;color:var(--green);text-transform:uppercase;margin-bottom:18px;}
+.intro-title{font-size:26px;font-weight:800;line-height:1.3;margin-bottom:6px;}
+.intro-sub{font-size:14px;color:var(--muted);margin-bottom:24px;}
+.type-legend{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px;}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+.info-card{background:var(--bg);border-radius:var(--rs);padding:14px 8px;text-align:center;}
+.info-num{font-size:22px;font-weight:800;color:var(--green);}
+.info-lbl{font-size:11px;color:var(--muted);margin-top:3px;}
+.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:24px;}
+.time-card{background:var(--bg);border-radius:var(--rs);padding:10px 12px;display:flex;align-items:center;gap:8px;}
+.time-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.time-lbl{font-size:12px;color:var(--muted);}
+.time-val{font-size:13px;font-weight:700;}
+.start-btn{width:100%;padding:16px;font-size:16px;font-weight:800;font-family:inherit;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s;}
+.start-btn:hover{background:var(--green-d);}
+.start-btn:active{transform:scale(.98);}
+.type-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:800;}
+.tb-g{background:var(--blue-l);color:var(--blue-deep);}
+.tb-b{background:var(--purple-l);color:var(--purple-deep);}
+.tb-o{background:var(--amber-l);color:var(--amber-deep);}
+.hd-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.quiz-counter{font-size:13px;font-weight:700;color:var(--muted);}
+.cutline-chip{font-size:12px;font-weight:700;color:var(--green-deep);background:var(--green-l);padding:3px 10px;border-radius:99px;}
+.progress-wrap{height:5px;background:#DDD;border-radius:99px;overflow:hidden;margin-bottom:12px;}
+.progress-fill{height:5px;background:var(--green);border-radius:99px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.timer-row{display:flex;justify-content:flex-end;margin-bottom:12px;}
+.timer-block{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.timer-lbl{font-size:10px;color:var(--hint);text-transform:uppercase;letter-spacing:.05em;}
+.timer-ring{position:relative;width:52px;height:52px;}
+.timer-ring svg{transform:rotate(-90deg);}
+.timer-ring circle{fill:none;stroke-width:4;}
+.ring-bg{stroke:#E0E0E0;}
+.ring-fill{stroke:var(--green);stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .4s;}
+.timer-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:var(--text);}
+.tw .ring-fill{stroke:var(--amber);}.tw .timer-num{color:var(--amber);}
+.td .ring-fill{stroke:var(--red);}.td .timer-num{color:var(--red);}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.td .timer-ring{animation:pulse .8s infinite;}
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;margin-bottom:14px;animation:fadeUp .22s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.q-num{font-size:11px;color:var(--hint);margin-bottom:8px;}
+.q-en{font-size:15px;line-height:2;margin-bottom:14px;color:var(--text);}
+.q-sub{font-size:14px;color:var(--text);margin-bottom:12px;line-height:1.7;}
+.blank-tag{font-weight:800;font-size:14px;color:var(--blue);background:var(--blue-l);padding:2px 8px;border-radius:5px;margin:0 2px;}
+.choices{display:flex;gap:8px;flex-wrap:wrap;}
+.choice-btn{flex:1;min-width:90px;padding:11px 12px;font-size:14px;font-family:inherit;border:1.5px solid var(--border);border-radius:var(--rs);background:var(--card);color:var(--text);cursor:pointer;text-align:center;font-weight:600;transition:all .12s;}
+.choice-btn:hover:not(:disabled){border-color:var(--green);background:var(--green-l);color:var(--green-deep);}
+.choice-btn.correct{background:var(--green-l);border-color:var(--green);color:var(--green-deep);font-weight:800;}
+.choice-btn.wrong{background:var(--red-l);border-color:var(--red);color:var(--red-deep);}
+.choice-btn:disabled{cursor:default;}
+.blank-input-wrap{display:flex;gap:8px;}
+.blank-input{flex:1;padding:11px 13px;font-size:15px;font-family:inherit;border:1.5px solid #CCC;border-radius:var(--rs);background:#FAFAFA;color:var(--text);outline:none;transition:border-color .15s;}
+.blank-input:focus{border-color:var(--purple);background:#fff;}
+.blank-input.correct{border-color:var(--green);background:var(--green-l);color:var(--green-deep);}
+.blank-input.wrong{border-color:var(--red);background:var(--red-l);color:var(--red-deep);}
+.submit-btn{padding:11px 16px;font-size:14px;font-weight:700;font-family:inherit;background:var(--purple);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;white-space:nowrap;}
+.submit-btn:hover{background:var(--purple-deep);}
+.answer-reveal{margin-top:10px;padding:9px 13px;border-radius:var(--rs);font-size:13px;font-weight:600;}
+.ar-ok{background:var(--green-l);color:var(--green-deep);}
+.ar-ng{background:var(--red-l);color:var(--red-deep);}
+.order-area-lbl{font-size:11px;color:var(--hint);margin-bottom:6px;font-weight:700;text-transform:uppercase;}
+.order-area{min-height:50px;border:2px dashed #DDD;border-radius:var(--rs);padding:8px 10px;display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;align-items:center;}
+.order-area.filled{border-color:var(--amber);background:var(--amber-l);}
+.word-chip{padding:7px 13px;font-size:14px;font-weight:600;border-radius:99px;cursor:pointer;transition:all .14s;user-select:none;white-space:nowrap;}
+.wc-avail{background:var(--card);border:1.5px solid var(--border);color:var(--text);}
+.wc-avail:hover{border-color:var(--amber);background:var(--amber-l);color:var(--amber-deep);}
+.wc-placed{background:var(--amber-l);border:1.5px solid var(--amber);color:var(--amber-deep);}
+.order-check-btn{width:100%;padding:12px;font-size:14px;font-weight:800;font-family:inherit;background:var(--amber);color:#fff;border:none;border-radius:var(--rs);cursor:pointer;margin-top:6px;}
+.order-check-btn:hover:not(:disabled){background:var(--amber-deep);}
+.order-check-btn:disabled{background:#CCC;cursor:default;}
+.timeout-msg{margin-top:10px;padding:10px 14px;border-radius:var(--rs);font-size:13px;font-weight:600;background:var(--amber-l);color:var(--amber-deep);border:1px solid #FAC775;}
+.result-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:30px 22px;text-align:center;margin-bottom:14px;}
+.result-emoji{font-size:46px;margin-bottom:10px;}
+.result-score{font-size:54px;font-weight:800;line-height:1;margin-bottom:8px;}
+.score-pass{color:var(--green);}.score-fail{color:var(--red);}
+.result-badge{display:inline-block;padding:5px 16px;border-radius:99px;font-size:14px;font-weight:800;margin-bottom:8px;}
+.badge-pass{background:var(--green-l);color:var(--green-deep);}
+.badge-fail{background:var(--red-l);color:var(--red-deep);}
+.result-pct{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.stat-row{display:flex;gap:10px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.stat-card{background:var(--bg);border-radius:var(--rs);padding:12px 16px;}
+.stat-num{font-size:22px;font-weight:800;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+.s-ok{color:var(--green);}.s-ng{color:var(--red);}.s-to{color:var(--amber);}
+.retry-btn{width:100%;padding:14px;font-size:15px;font-weight:800;font-family:inherit;background:var(--green);color:#fff;border:none;border-radius:var(--r);cursor:pointer;transition:background .15s,transform .1s;}
+.retry-btn:hover{background:var(--green-d);}
+.retry-btn:active{transform:scale(.98);}
+.review-title{font-size:14px;font-weight:800;margin-bottom:10px;margin-top:14px;}
+.review-item{background:var(--card);border:1px solid #F09595;border-radius:var(--rs);padding:13px 15px;margin-bottom:8px;}
+.review-item.to{border-color:#FAC775;}
+.r-num{font-size:11px;color:var(--hint);margin-bottom:6px;}
+.r-en{font-size:13px;color:var(--text);margin-bottom:8px;line-height:1.8;}
+.tag{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;margin-right:4px;margin-top:2px;}
+.tag-ng{background:var(--red-l);color:var(--red-deep);}
+.tag-ok{background:var(--green-l);color:var(--green-deep);}
+.tag-to{background:var(--amber-l);color:var(--amber-deep);}
+.hist-section{margin-top:20px;}
+.hist-title{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;}
+.hist-clear{font-size:11px;font-weight:600;color:var(--red);background:none;border:none;cursor:pointer;}
+.hist-empty{font-size:13px;color:var(--hint);text-align:center;padding:20px 0;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:12px 16px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;}
+.hist-item:hover{border-color:var(--green);}
+.hist-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.hist-left{flex:1;}
+.hist-date{font-size:11px;color:var(--hint);margin-bottom:4px;}
+.hist-score{font-size:18px;font-weight:800;}
+.hist-score.pass{color:var(--green);}.hist-score.fail{color:var(--red);}
+.hist-pct{font-size:12px;color:var(--muted);margin-top:2px;}
+.hist-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px;}
+.hb-pass{background:var(--green-l);color:var(--green-deep);}
+.hb-fail{background:var(--red-l);color:var(--red-deep);}
+.hist-bar-wrap{width:80px;height:6px;background:#E0E0E0;border-radius:99px;overflow:hidden;margin-top:4px;}
+.hist-bar{height:6px;border-radius:99px;}
+.hist-detail{margin-top:12px;border-top:1px solid var(--border);padding-top:10px;display:none;}
+.hist-detail.open{display:block;}
+.hd-item{background:var(--bg);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;}
+.hd-item.hd-to{border-left:3px solid var(--amber);}
+.hd-item.hd-ng{border-left:3px solid var(--red);}
+.hd-qnum{font-size:10px;color:var(--hint);margin-bottom:4px;}
+.hd-en{font-size:12px;line-height:1.7;margin-bottom:5px;}
+.hd-tags{display:flex;flex-wrap:wrap;gap:4px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const ALL_Q = [
+  {n:"1",t:"g",en:"For the science project, our group [A] chosen very special insects.",blanks:[{l:"[A]",c:["has","was"],a:"has"}]},
+  {n:"2",t:"g",en:"For the science project, our group has [A] very special insects.",blanks:[{l:"[A]",c:["chose","chosen"],a:"chosen"}]},
+  {n:"3",t:"g",en:"For the science project, our group has chosen very special [A].",blanks:[{l:"[A]",c:["animals","insects"],a:"insects"}]},
+  {n:"4",t:"g",en:"They are very [A].",blanks:[{l:"[A]",c:["social","political"],a:"social"}]},
+  {n:"5",t:"g",en:"They are as [A] as the T-Rex.",blanks:[{l:"[A]",c:["old","older"],a:"old"}]},
+  {n:"6",t:"g",en:"They [A] in Aesop's stories.",blanks:[{l:"[A]",c:["appear","disappear"],a:"appear"}]},
+  {n:"7",t:"b",en:"They use a special _____ to communicate.",a:"chemical"},
+  {n:"8",t:"g",en:"They use a special chemical [A].",blanks:[{l:"[A]",c:["communicating","to communicate"],a:"to communicate"}]},
+  {n:"9",t:"g",en:"Can you guess what [A]?",blanks:[{l:"[A]",c:["are they","they are"],a:"they are"}]},
+  {n:"10",t:"o",ko:"우리가 이 곤충들에 대해 배운 것을 여러분과 공유하고 싶습니다.",en:"_____.",ws:["about","with","these","learned","we","share","to","what","want","insects","have","we","you"],a:"We want to share with you what we have learned about these insects"},
+  {n:"11",t:"g",en:"We [A] ants come out of nowhere.",blanks:[{l:"[A]",c:["see often","often see"],a:"often see"}]},
+  {n:"12",t:"g",en:"We often see ants [A] out of nowhere.",blanks:[{l:"[A]",c:["come","to come"],a:"come"}]},
+  {n:"13",t:"b",en:"We often see ants come _____ _____ _____.",a:"out of nowhere"},
+  {n:"14",t:"g",en:"Like humans, they live almost [A] in the world.",blanks:[{l:"[A]",c:["nowhere","everywhere"],a:"everywhere"}]},
+  {n:"15",t:"g",en:"They live almost everywhere, except a [A] extremely cold places.",blanks:[{l:"[A]",c:["few","little"],a:"few"}]},
+  {n:"16",t:"g",en:"They live almost everywhere, except a few [A] cold places including Antarctica.",blanks:[{l:"[A]",c:["slightly","extremely"],a:"extremely"}]},
+  {n:"17",t:"g",en:"They live almost everywhere, except a few extremely cold places [A] Antarctica.",blanks:[{l:"[A]",c:["including","excluding"],a:"including"}]},
+  {n:"18",t:"b",en:"_____ _____ 2018, there were over 7 billion people on Earth.",a:"As of"},
+  {n:"19",t:"g",en:"As of 2018, there [A] over 7 billion people on Earth.",blanks:[{l:"[A]",c:["was","were"],a:"were"}]},
+  {n:"20",t:"b",en:"As of 2018, there were over 7 _____ people on Earth.",a:"billion"},
+  {n:"21",t:"b",en:"There are about one _____ ants for every human in the world.",a:"million"},
+  {n:"22",t:"g",en:"There are about one million ants for every [A] in the world.",blanks:[{l:"[A]",c:["human","humans"],a:"human"}]},
+  {n:"23",t:"o",ko:"각각의 개미는 거의 아무 무게도 나가지 않지만",en:"_____, one million ants weigh as heavy as a human being.",ws:["hardly","anything","weighs","each","ant","though"],a:"Though each ant hardly weighs anything"},
+  {n:"24",t:"o",ko:"백만 마리의 개미는 체중이 약 62kg인 사람 한 명과 무게가 같다.",en:"_____.",ws:["one million ants","are","as heavy as","a human being","weighing about","62 kilograms"],a:"one million ants are as heavy as a human being weighing about 62 kilograms"},
+  {n:"25",t:"g",en:"Ants live in colonies [A] have lots of residents living together.",blanks:[{l:"[A]",c:["what","which"],a:"which"}]},
+  {n:"26",t:"g",en:"Ants live in colonies which [A] lots of residents living together.",blanks:[{l:"[A]",c:["has","have"],a:"have"}]},
+  {n:"27",t:"g",en:"Ants live in colonies which have lots of [A] living together.",blanks:[{l:"[A]",c:["guests","residents"],a:"residents"}]},
+  {n:"28",t:"g",en:"Ants live in colonies which have lots of residents [A] together.",blanks:[{l:"[A]",c:["lived","living"],a:"living"}]},
+  {n:"29",t:"g",en:"Ants live in colonies which have lots of residents living [A].",blanks:[{l:"[A]",c:["alone","together"],a:"together"}]},
+  {n:"30",t:"g",en:"Within a colony, there are [A] three different types of ants.",blanks:[{l:"[A]",c:["usually","rarely"],a:"usually"}]},
+  {n:"31",t:"g",en:"Within a colony, there are usually three [A] types of ants.",blanks:[{l:"[A]",c:["different","differently"],a:"different"}]},
+  {n:"32",t:"g",en:"There is the queen, and [A] she does her entire life is lay eggs.",blanks:[{l:"[A]",c:["what","that"],a:"what"}]},
+  {n:"33",t:"g",en:"There is the queen, and what she does her [A] life is lay eggs.",blanks:[{l:"[A]",c:["entire","partial"],a:"entire"}]},
+  {n:"34",t:"g",en:"There is the queen, and what she does her entire life [A] lay eggs.",blanks:[{l:"[A]",c:["is","are"],a:"is"}]},
+  {n:"35",t:"b",en:"What the queen does her entire life is _____ _____.",a:"lay eggs"},
+  {n:"36",t:"g",en:"The second type of ant is the [A] that helps the queen produce these eggs.",blanks:[{l:"[A]",c:["male","female"],a:"male"}]},
+  {n:"37",t:"g",en:"The second type of ant is the male [A] helps the queen produce these eggs.",blanks:[{l:"[A]",c:["what","that"],a:"that"}]},
+  {n:"38",t:"g",en:"The second type of ant is the male that [A] the queen produce these eggs.",blanks:[{l:"[A]",c:["help","helps"],a:"helps"}]},
+  {n:"39",t:"g",en:"The second type of ant is the male that helps the queen [A] these eggs.",blanks:[{l:"[A]",c:["remove","produce"],a:"produce"}]},
+  {n:"40",t:"g",en:"Worker ants are all [A] and do very important jobs.",blanks:[{l:"[A]",c:["male","female"],a:"female"}]},
+  {n:"41",t:"g",en:"Worker ants are all female and [A] very important jobs.",blanks:[{l:"[A]",c:["do","does"],a:"do"}]},
+  {n:"42",t:"w",en:"Worker ants do very important jobs, like _____ eggs, defending the colony, and collecting food.",ws:["caring for","handing out","looking after","taking care of"],a:"handing out"},
+  {n:"43",t:"g",en:"Worker ants do very important jobs, like caring for eggs, [A] the colony, and collecting food.",blanks:[{l:"[A]",c:["attacking","defending"],a:"defending"}]},
+  {n:"44",t:"g",en:"Worker ants do very important jobs, like caring for eggs, defending the colony, and [A] food.",blanks:[{l:"[A]",c:["collecting","to collect"],a:"collecting"}]},
+  {n:"45",t:"o",ko:"개미들이 인간들처럼 말을 하는 것은 아니지만",en:"_____, they actually have a language.",ws:["Though","ants","do not","speak","like","humans"],a:"Though ants do not speak like humans"},
+  {n:"46",t:"b",en:"Ants actually have a _____.",a:"language"},
+  {n:"47",t:"o",ko:"개미들은 페로몬이라고 불리는 화학 물질을 만들어 서로 소통한다.",en:"_____.",ws:["Ants","produce","a chemical","called a pheromone","to communicate","with one another"],a:"Ants produce a chemical called a pheromone to communicate with one another"},
+  {n:"48",t:"g",en:"By [A] the chemical, they can exchange information about food or danger.",blanks:[{l:"[A]",c:["used","using"],a:"using"}]},
+  {n:"49",t:"g",en:"By using the chemical, they can [A] information about food or danger.",blanks:[{l:"[A]",c:["exchange","be exchanged"],a:"exchange"}]},
+  {n:"50",t:"g",en:"By using the chemical, they can exchange information about food or [A].",blanks:[{l:"[A]",c:["safety","danger"],a:"danger"}]},
+  {n:"51",t:"g",en:"Ants also use [A] for communication.",blanks:[{l:"[A]",c:["smell","touch"],a:"touch"}]},
+  {n:"52",t:"b",en:"_____ _____, if an ant finds food, it passes on the good news by rubbing its body on its neighbor.",a:"For example"},
+  {n:"53",t:"g",en:"For example, if an ant [A] food, it passes on the good news by rubbing its body on its neighbor.",blanks:[{l:"[A]",c:["finds","is found"],a:"finds"}]},
+  {n:"54",t:"b",en:"If an ant finds food, it _____ _____ the good news by rubbing its body on its neighbor.",a:"passes on"},
+  {n:"55",t:"g",en:"If an ant finds food, it passes on the good news by [A] its body on its neighbor.",blanks:[{l:"[A]",c:["rubbing","tapping"],a:"rubbing"}]},
+  {n:"56",t:"o",ko:"개미는 매우 예민한 털로 덮인 다리를 가지고 있으므로",en:"_____, it can sense even the smallest touch.",ws:["Since","an ant","has legs","covered with","very sensitive","hairs"],a:"Since an ant has legs covered with very sensitive hairs"},
+  {n:"57",t:"g",en:"Since an ant has legs covered with very sensitive hairs, it can [A] even the smallest touch.",blanks:[{l:"[A]",c:["sense","miss"],a:"sense"}]},
+  {n:"58",t:"g",en:"Since an ant has legs covered with very sensitive hairs, it can sense even the [A] touch.",blanks:[{l:"[A]",c:["smallest","largest"],a:"smallest"}]},
+  {n:"59",t:"b",en:"Some queen ants live _____ _____ 30 years.",a:"up to"},
+  {n:"60",t:"g",en:"Some ants can carry things [A] are 50 times their own body weight.",blanks:[{l:"[A]",c:["what","that"],a:"that"}]},
+  {n:"61",t:"g",en:"Some ants can carry things that [A] 50 times their own body weight.",blanks:[{l:"[A]",c:["is","are"],a:"are"}]},
+  {n:"62",t:"g",en:"Some ants can carry things that are 50 times [A] own body weight.",blanks:[{l:"[A]",c:["its","their"],a:"their"}]},
+  {n:"63",t:"b",en:"Some ants can carry things that are 50 times their own body _____.",a:"weight"},
+  {n:"64",t:"g",en:"Ants do not have [A] but breathe through small holes in their bodies.",blanks:[{l:"[A]",c:["legs","lungs"],a:"lungs"}]},
+  {n:"65",t:"g",en:"Ants do not have lungs [A] breathe through small holes in their bodies.",blanks:[{l:"[A]",c:["and","but"],a:"but"}]},
+  {n:"66",t:"g",en:"Ants do not have lungs but [A] through small holes in their bodies.",blanks:[{l:"[A]",c:["breathe","to breathe"],a:"breathe"}]},
+  {n:"67",t:"g",en:"One stomach holds food for [A], and the other holds food to share with others.",blanks:[{l:"[A]",c:["itself","themselves"],a:"itself"}]},
+  {n:"68",t:"b",en:"One stomach holds food for itself, and _____ _____ holds food to share with others.",a:"the other"},
+  {n:"69",t:"g",en:"One stomach holds food for itself, and the other holds food [A] with others.",blanks:[{l:"[A]",c:["sharing","to share"],a:"to share"}]},
+  {n:"70",t:"g",en:"One stomach holds food for itself, and the other holds food to share with [A].",blanks:[{l:"[A]",c:["others","another"],a:"others"}]},
+  {n:"71",t:"g",en:"Most ants can [A] and live 24 hours underwater.",blanks:[{l:"[A]",c:["swim","swam"],a:"swim"}]},
+  {n:"72",t:"g",en:"Most ants can swim and [A] 24 hours underwater.",blanks:[{l:"[A]",c:["live","to live"],a:"live"}]},
+  {n:"73",t:"b",en:"Most ants can swim and live 24 hours _____.",a:"underwater"},
+];
+
+const TOTAL=30, CUTLINE=3;
+const T_G=5,T_B=10,T_O=30,CIRCUM=2*Math.PI*20;
+const STORAGE_KEY='quiz_history_ants';
+let questions=[],idx=0,answers={},timeouts={},screen='intro';
+let timerSec=5,timerInterval=null,advancing=false;
+let orderPlaced=[],orderAvail=[];
+
+function loadHistory(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch{return[];}}
+function saveHistory(c,t,cl,wi){
+  const h=loadHistory();
+  h.unshift({date:new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),correct:c,total:t,cutline:cl,pct:Math.round((c/t)*100),pass:c>=cl,wrongs:wi});
+  if(h.length>20)h.pop();
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(h));}catch{}
+}
+function shuffle(a){let b=[...a];for(let i=b.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+function getTime(q){return q.t==='o'?T_O:q.t==='b'?T_B:T_G;}
+function start(){questions=shuffle(ALL_Q).slice(0,TOTAL);idx=0;answers={};timeouts={};screen='quiz';advancing=false;initOrder();startTimer();render();}
+function initOrder(){const q=questions[idx];if(q&&q.t==='o'){orderAvail=shuffle([...q.ws]);orderPlaced=[];}}
+function startTimer(){clearInterval(timerInterval);timerSec=getTime(questions[idx]);timerInterval=setInterval(()=>{timerSec--;updateTimerUI();if(timerSec<=0)onTimeout();},1000);}
+function updateTimerUI(){
+  const ring=document.querySelector('.ring-fill'),num=document.querySelector('.timer-num'),wrap=document.querySelector('.tw-inner');
+  if(!ring||!num)return;
+  const mx=getTime(questions[idx]);
+  ring.style.strokeDashoffset=CIRCUM*(1-(timerSec/mx));
+  num.textContent=timerSec;
+  if(wrap)wrap.className='tw-inner'+(timerSec<=Math.ceil(mx*.12)?'td':timerSec<=Math.ceil(mx*.3)?'tw':'');
+}
+function onTimeout(){if(advancing)return;clearInterval(timerInterval);timeouts[idx]=true;answers[idx]='__timeout__';advancing=true;render();setTimeout(()=>{advancing=false;advance();},1300);}
+function advance(){if(idx<TOTAL-1){advancing=false;idx++;initOrder();startTimer();render();}else{clearInterval(timerInterval);screen='result';render();}}
+function isCorrect(q,qi){
+  const a=answers[qi];if(!a||a==='__timeout__')return false;
+  if(q.t==='g')return q.blanks.every((_,bi)=>answers[`${qi}_${bi}`]===q.blanks[bi].a);
+  if(q.t==='b')return a.trim().toLowerCase()===q.a.toLowerCase();
+  if(q.t==='o')return a.trim().toLowerCase().replace(/[.,!?'"]/g,'')===q.a.trim().toLowerCase().replace(/[.,!?'"]/g,'');
+  return false;
+}
+function scoreQ(){return questions.reduce((c,q,qi)=>isCorrect(q,qi)?c+1:c,0);}
+function tLabel(t){return t==='g'?'어법 선택':t==='b'?'빈칸 완성':'어순 배열';}
+function tCls(t){return t==='g'?'tb-g':t==='b'?'tb-b':'tb-o';}
+function tTime(t){return t==='g'?'5초':t==='b'?'10초':'30초';}
+
+function render(){const app=document.getElementById('app');if(screen==='intro')app.innerHTML=renderIntro();else if(screen==='quiz')app.innerHTML=renderQuiz();else app.innerHTML=renderResult();attachEvents();}
+
+function renderIntro(){
+  const types=['g','b','o'],dots={g:'#185FA5',b:'#6B3FA0',o:'#BA7517'};
+  const hist=loadHistory();
+  const histHtml=hist.length===0?`<div class="hist-empty">아직 풀이 기록이 없어요</div>`
+    :hist.map((h,hi)=>{
+      const wh=(h.wrongs&&h.wrongs.length>0)?h.wrongs.map(w=>`<div class="hd-item ${w.isTO?'hd-to':'hd-ng'}"><div class="hd-qnum">${w.n} &nbsp;<span class="type-badge ${w.tcls}" style="font-size:10px;padding:2px 7px;">${w.tlbl}</span>${w.isTO?' ⏰':''}</div>${w.en?`<div class="hd-en">${w.en}</div>`:''}<div class="hd-tags"><span class="tag tag-ng">${w.isTO?'시간초과':'입력: '+w.ua}</span><span class="tag tag-ok">정답: ${w.ans}</span></div></div>`).join(''):`<div style="font-size:12px;color:var(--hint);text-align:center;padding:8px 0;">오답 없음 🎉</div>`;
+      return `<div class="hist-item" data-hi="${hi}"><div class="hist-top"><div class="hist-left"><div class="hist-date">${h.date}</div><div class="hist-score ${h.pass?'pass':'fail'}">${h.correct} / ${h.total}</div><div class="hist-bar-wrap"><div class="hist-bar" style="width:${h.pct}%;background:${h.pass?'var(--green)':'var(--red)'}"></div></div><div class="hist-pct">정답률 ${h.pct}%</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;"><span class="hist-badge ${h.pass?'hb-pass':'hb-fail'}">${h.pass?'합격':'불합격'}</span><span style="font-size:11px;color:var(--muted);" class="hist-toggle-txt">오답 보기 ▼</span></div></div><div class="hist-detail" id="hd-${hi}">${wh}</div></div>`;
+    }).join('');
+  return `<div class="intro-box">
+  <div class="intro-logo">수능형 지문</div>
+  <div class="intro-title">The Amazing Ants</div>
+  <div class="intro-sub">어법선택 + 빈칸완성 + 어순배열 + 알맞지않은것</div>
+  <div class="type-legend">${types.map(t=>`<span class="type-badge ${tCls(t)}">${tLabel(t)}</span>`).join('')}</div>
+  <div class="info-grid">
+    <div class="info-card"><div class="info-num">${TOTAL}</div><div class="info-lbl">전체 문항</div></div>
+    <div class="info-card"><div class="info-num">${CUTLINE}개</div><div class="info-lbl">합격 커트라인</div></div>
+    <div class="info-card"><div class="info-num">3가지</div><div class="info-lbl">문제 유형</div></div>
+  </div>
+  <div class="time-grid">${types.map(t=>`<div class="time-card"><div class="time-dot" style="background:${dots[t]}"></div><div><div class="time-lbl">${tLabel(t)}</div><div class="time-val">제한 ${tTime(t)}</div></div></div>`).join('')}</div>
+  <button class="start-btn" id="start-btn">시작하기</button>
+  <div class="hist-section"><div class="hist-title"><span>📋 이전 풀이 기록 (최대 20회)</span>${hist.length>0?`<button class="hist-clear" id="hist-clear">기록 삭제</button>`:''}</div>${histHtml}</div>
+</div>`;
+}
+
+function renderQuiz(){
+  const q=questions[idx],mx=getTime(q),pct=Math.round((idx/TOTAL)*100);
+  const offset=CIRCUM*(1-(timerSec/mx)),twCls=timerSec<=Math.ceil(mx*.12)?'td':timerSec<=Math.ceil(mx*.3)?'tw':'';
+  const isTO=timeouts[idx];
+  let enHtml=q.en||'';
+  if(q.t==='g'&&q.blanks)q.blanks.forEach(b=>{enHtml=enHtml.replace(b.l,`<span class="blank-tag">${b.l}</span>`);});
+  const curBi=q.t==='g'?q.blanks.findIndex((_,bi)=>answers[`${idx}_${bi}`]===undefined):-1;
+  const b=curBi>=0?q.blanks[curBi]:null;
+  let body='';
+  if(isTO){
+    const ans=q.t==='g'?q.blanks.map(x=>x.a).join(' / '):q.a;
+    body=`<div class="timeout-msg">⏰ 시간 초과! &nbsp;정답: <strong>${ans}</strong></div>`;
+  } else if(q.t==='g'&&b){
+    body=`<div class="q-sub">${b.l} 중 알맞은 것은?</div><div class="choices">${b.c.map(c=>`<button class="choice-btn" data-t="g" data-bi="${curBi}" data-ch="${c}">${c}</button>`).join('')}</div>`;
+  } else if(q.t==='b'&&!answers[idx]){
+    body=`<div class="blank-input-wrap"><input class="blank-input" id="blank-inp" type="text" placeholder="영어로 입력하세요" autocomplete="off" autocorrect="off" spellcheck="false"><button class="submit-btn" id="blank-sub">확인</button></div>`;
+  } else if(q.t==='b'&&answers[idx]){
+    const ok=answers[idx].trim().toLowerCase()===q.a.toLowerCase();
+    body=`<div class="answer-reveal ${ok?'ar-ok':'ar-ng'}">${ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+q.a+'</strong>'}</div>`;
+  } else if(q.t==='o'&&!answers[idx]){
+    const ph=orderPlaced.length>0?orderPlaced.map((w,i)=>`<span class="word-chip wc-placed" data-pi="${i}">${w}</span>`).join(''):`<span style="font-size:12px;color:var(--hint)">단어를 클릭해서 순서대로 배열하세요</span>`;
+    const ah=orderAvail.map((w,i)=>`<span class="word-chip wc-avail" data-ai="${i}">${w}</span>`).join('');
+    body=`<div class="order-area-lbl">배열 순서</div><div class="order-area ${orderPlaced.length>0?'filled':''}">${ph}</div><div class="order-area-lbl" style="margin-top:10px;">단어 목록</div><div class="order-area">${ah}</div><button class="order-check-btn" id="order-check" ${orderPlaced.length===0?'disabled':''}>정답 확인</button>`;
+  } else if(q.t==='o'&&answers[idx]){
+    const ok=isCorrect(q,idx);
+    body=`<div class="answer-reveal ${ok?'ar-ok':'ar-ng'}">${ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+q.a+'</strong>'}</div>`;
+  }
+  return `<div class="hd-row"><div class="quiz-counter">문항 ${idx+1} / ${TOTAL}</div><div class="cutline-chip">커트라인 ${CUTLINE}개</div></div>
+<div class="progress-wrap"><div class="progress-fill" style="width:${pct}%"></div></div>
+<div class="timer-row"><div class="timer-block"><div class="timer-lbl">남은시간</div>
+<div class="tw-inner ${twCls}"><div class="timer-ring"><svg width="52" height="52" viewBox="0 0 52 52"><circle class="ring-bg" cx="26" cy="26" r="20"/><circle class="ring-fill" cx="26" cy="26" r="20" stroke-dasharray="${CIRCUM}" stroke-dashoffset="${offset}"/></svg><div class="timer-num">${timerSec}</div></div></div></div></div>
+<div class="q-card">
+  <div class="q-num">${q.n} &nbsp;<span class="type-badge ${tCls(q.t)}">${tLabel(q.t)}</span></div>
+  ${enHtml?`<div class="q-en">${enHtml}</div>`:''}
+  ${q.t==='o'?`<div class="q-sub">단어를 올바른 순서로 배열하세요</div>`:''}
+  ${body}
+</div>`;
+}
+
+function renderResult(){
+  const correct=scoreQ(),toCount=Object.keys(timeouts).length,pass=correct>=CUTLINE;
+  const pct=Math.round((correct/TOTAL)*100),emoji=pass?(correct===TOTAL?'🎉':'👍'):(correct>=Math.ceil(TOTAL*.7)?'💪':'📚');
+  const wrongIdxs=questions.map((_,qi)=>qi).filter(qi=>!isCorrect(questions[qi],qi));
+  const wrongItems=wrongIdxs.map(qi=>{
+    const q=questions[qi],isTO=!!timeouts[qi];
+    const ans=q.t==='g'?q.blanks.map(x=>x.a).join(' / '):q.a;
+    const ua=q.t==='g'?q.blanks.map((_,bi)=>{const s=answers[`${qi}_${bi}`];return(!s||s==='__timeout__')?'시간초과':s;}).join(' / '):(!answers[qi]||answers[qi]==='__timeout__'?'시간초과':answers[qi]);
+    return{n:q.n,t:q.t,tlbl:tLabel(q.t),tcls:tCls(q.t),en:q.en||'',ans,ua,isTO};
+  });
+  saveHistory(correct,TOTAL,CUTLINE,wrongItems);
+  return `<div class="result-card"><div class="result-emoji">${emoji}</div><div class="result-score ${pass?'score-pass':'score-fail'}">${correct} / ${TOTAL}</div><div class="result-badge ${pass?'badge-pass':'badge-fail'}">${pass?'합격 ✓':'불합격 ✗'} · 커트라인 ${CUTLINE}개</div><div class="result-pct">정답률 ${pct}%</div><div class="stat-row"><div class="stat-card"><div class="stat-num s-ok">${correct}</div><div class="stat-lbl">정답</div></div><div class="stat-card"><div class="stat-num s-ng">${TOTAL-correct-toCount}</div><div class="stat-lbl">오답</div></div><div class="stat-card"><div class="stat-num s-to">${toCount}</div><div class="stat-lbl">시간초과</div></div></div><button class="retry-btn" id="retry-btn">다시 풀기</button></div>
+${wrongIdxs.length>0?`<div class="review-title">오답 목록 (${wrongIdxs.length}개)</div>${wrongIdxs.map(qi=>{const q=questions[qi],isTO=!!timeouts[qi];const ans=q.t==='g'?q.blanks.map(x=>x.a).join(' / '):q.a;const ua=q.t==='g'?q.blanks.map((_,bi)=>{const s=answers[`${qi}_${bi}`];return(!s||s==='__timeout__')?'시간초과':s;}).join(' / '):(!answers[qi]||answers[qi]==='__timeout__'?'시간초과':answers[qi]);return `<div class="review-item ${isTO?'to':''}"><div class="r-num">${q.n} &nbsp;<span class="type-badge ${tCls(q.t)}">${tLabel(q.t)}</span>${isTO?' ⏰':''}</div>${q.en?`<div class="r-en">${q.en}</div>`:''}<span class="tag ${isTO?'tag-to':'tag-ng'}">${isTO?'시간초과':'입력: '+ua}</span><span class="tag tag-ok">정답: ${ans}</span></div>`;}).join('')}`:`<div style="text-align:center;color:var(--green);font-weight:800;padding:20px;font-size:15px;">전 문항 정답! 완벽합니다 🎉</div>`}`;
+}
+
+function attachEvents(){
+  const app=document.getElementById('app');
+  const s=app.querySelector('#start-btn');if(s)s.addEventListener('click',start);
+  const r=app.querySelector('#retry-btn');if(r)r.addEventListener('click',start);
+  const hc=app.querySelector('#hist-clear');if(hc)hc.addEventListener('click',()=>{try{localStorage.removeItem(STORAGE_KEY);}catch{}render();});
+  app.querySelectorAll('.hist-item').forEach(item=>{
+    item.addEventListener('click',e=>{
+      if(e.target.closest('#hist-clear'))return;
+      const hi=item.dataset.hi,detail=document.getElementById('hd-'+hi);if(!detail)return;
+      const isOpen=detail.classList.contains('open');
+      app.querySelectorAll('.hist-detail').forEach(d=>d.classList.remove('open'));
+      app.querySelectorAll('.hist-toggle-txt').forEach(t=>{t.textContent='오답 보기 ▼';});
+      if(!isOpen){detail.classList.add('open');const txt=item.querySelector('.hist-toggle-txt');if(txt)txt.textContent='닫기 ▲';}
+    });
+  });
+  app.querySelectorAll('.choice-btn').forEach(btn=>btn.addEventListener('click',()=>{
+    const t=btn.dataset.t,ch=btn.dataset.ch;
+    if(t==='g'){
+      const bi=parseInt(btn.dataset.bi),key=`${idx}_${bi}`;
+      if(answers[key]!==undefined||advancing)return;
+      clearInterval(timerInterval);advancing=true;
+      const cor=questions[idx].blanks[bi].a;answers[key]=ch;answers[idx]=ch;
+      const ok=ch===cor;btn.classList.add(ok?'correct':'wrong');
+      btn.parentElement.querySelectorAll('.choice-btn').forEach(b2=>{b2.disabled=true;if(!ok&&b2.dataset.ch===cor)b2.classList.add('correct');});
+      const nb=questions[idx].blanks.findIndex((_,i)=>answers[`${idx}_${i}`]===undefined);
+      setTimeout(()=>{if(nb>=0){advancing=false;clearInterval(timerInterval);timerSec=T_G;startTimer();render();}else{advancing=false;advance();}},ok?400:800);
+    }
+  }));
+  const bi=app.querySelector('#blank-inp'),bs=app.querySelector('#blank-sub');
+  if(bi&&bs){
+    const doSub=()=>{
+      const val=bi.value.trim();if(!val||advancing)return;
+      clearInterval(timerInterval);advancing=true;answers[idx]=val;
+      const ok=val.toLowerCase()===questions[idx].a.toLowerCase();
+      bi.classList.add(ok?'correct':'wrong');bi.disabled=true;bs.disabled=true;
+      const fb=document.createElement('div');fb.className=`answer-reveal ${ok?'ar-ok':'ar-ng'}`;
+      fb.innerHTML=ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+questions[idx].a+'</strong>';
+      bs.parentElement.parentElement.appendChild(fb);
+      setTimeout(()=>{advancing=false;advance();},ok?600:1100);
+    };
+    bs.addEventListener('click',doSub);bi.addEventListener('keydown',e=>{if(e.key==='Enter')doSub();});setTimeout(()=>bi.focus(),80);
+  }
+  app.querySelectorAll('.wc-placed').forEach(chip=>chip.addEventListener('click',()=>{const i=parseInt(chip.dataset.pi);orderAvail.push(orderPlaced[i]);orderPlaced.splice(i,1);render();}));
+  app.querySelectorAll('.wc-avail').forEach(chip=>chip.addEventListener('click',()=>{const i=parseInt(chip.dataset.ai);orderPlaced.push(orderAvail[i]);orderAvail.splice(i,1);render();}));
+  const oc=app.querySelector('#order-check');
+  if(oc)oc.addEventListener('click',()=>{
+    if(orderPlaced.length===0||advancing)return;
+    clearInterval(timerInterval);advancing=true;
+    const ua=orderPlaced.join(' ');answers[idx]=ua;
+    const ok=isCorrect(questions[idx],idx);
+    const fb=document.createElement('div');fb.className=`answer-reveal ${ok?'ar-ok':'ar-ng'}`;
+    fb.innerHTML=ok?'✓ 정답입니다!':'✗ 오답 — 정답: <strong>'+questions[idx].a+'</strong>';
+    oc.parentElement.appendChild(fb);oc.disabled=true;
+    app.querySelectorAll('.word-chip').forEach(c=>c.style.pointerEvents='none');
+    setTimeout(()=>{advancing=false;advance();},ok?600:1200);
+  });
+}
+render();
+</script>
+</body>
+</html>
